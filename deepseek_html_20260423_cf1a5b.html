@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Umbrela mea magică | Joc educațional despre emoții</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none; /* evita selectarea textului pe butoane, dar nu afecteaza accesibilitatea */
+        }
+
+        body {
+            background: linear-gradient(145deg, #b2dfdb 0%, #80cbc4 100%);
+            font-family: 'Comic Neue', 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI Emoji', 'Apple Color Emoji', cursive, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* nori si picaturi decorative (doar fundal) */
+        body::before {
+            content: "🌧️🌧️🌧️";
+            font-size: 80px;
+            position: absolute;
+            top: 20px;
+            left: 10px;
+            opacity: 0.2;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        body::after {
+            content: "☂️🌈";
+            font-size: 100px;
+            bottom: 10px;
+            right: 10px;
+            position: absolute;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        /* containerul principal joc */
+        .game-container {
+            max-width: 750px;
+            width: 100%;
+            background: #fffef7;
+            border-radius: 72px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2), inset 0 1px 4px rgba(255,255,200,0.8);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 4px solid #ffd966;
+        }
+
+        /* header cu titlu si umbrela */
+        .game-header {
+            background: #ffebaf;
+            padding: 20px 20px 15px 20px;
+            text-align: center;
+            border-bottom: 5px solid #f9b81b;
+        }
+        h1 {
+            font-size: 1.9rem;
+            margin: 0;
+            color: #2c5a2e;
+            text-shadow: 3px 3px 0 #ffe0a3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        h1 span {
+            font-size: 2.3rem;
+        }
+        .sub {
+            font-size: 1.1rem;
+            background: #e6f4e8;
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 40px;
+            margin-top: 12px;
+            color: #2c6e3c;
+            font-weight: bold;
+        }
+
+        /* zona scor si progres */
+        .score-area {
+            background: #c8e6f0;
+            padding: 12px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-weight: bold;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #6fc2d0;
+            color: #1f4f5c;
+        }
+        .score-box {
+            background: #fdf8e7;
+            border-radius: 50px;
+            padding: 6px 18px;
+            box-shadow: inset 0 1px 3px #0001, 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .question-counter {
+            background: #ffefbf;
+            padding: 6px 18px;
+            border-radius: 50px;
+        }
+
+        /* zona intrebare */
+        .question-area {
+            padding: 30px 25px 20px;
+            background: #fff9ef;
+        }
+        .question-text {
+            font-size: 1.7rem;
+            font-weight: bold;
+            color: #2c3e2f;
+            background: #fef6e0;
+            padding: 18px 20px;
+            border-radius: 60px;
+            margin-bottom: 28px;
+            text-align: center;
+            border: 2px solid #ffcf7a;
+            box-shadow: 0 6px 0 #e6c48b;
+            line-height: 1.3;
+        }
+        .answers {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .answer-btn {
+            background: #fff0ce;
+            border: 3px solid #fcb375;
+            padding: 14px 18px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-family: inherit;
+            font-weight: bold;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #2d3e2b;
+        }
+        .answer-btn:hover {
+            background: #ffe3ac;
+            transform: scale(0.98);
+            border-color: #f9a046;
+        }
+        .answer-emoji {
+            font-size: 1.9rem;
+            min-width: 48px;
+            text-align: center;
+        }
+
+        /* feedback mesaj */
+        .feedback {
+            background: #daf2e4;
+            margin: 20px 25px 10px;
+            padding: 14px 18px;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #1b6b3c;
+            border-left: 12px solid #9fd3a3;
+            transition: 0.15s;
+        }
+
+        /* butoane control */
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 10px 25px 30px;
+        }
+        .btn-next, .btn-restart {
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            background: #ffcd7e;
+            padding: 12px 25px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.1s linear;
+            box-shadow: 0 5px 0 #b97f2e;
+            color: #2b452b;
+        }
+        .btn-next:active, .btn-restart:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #b97f2e;
+        }
+        .btn-restart {
+            background: #9bc2c4;
+            box-shadow: 0 5px 0 #618c8f;
+            color: #1e3f3f;
+        }
+        .disabled-btn {
+            opacity: 0.6;
+            pointer-events: none;
+            transform: none;
+        }
+
+        /* ecran final */
+        .final-screen {
+            text-align: center;
+            padding: 35px 25px;
+        }
+        .final-message {
+            font-size: 2rem;
+            background: #ffecb3;
+            border-radius: 70px;
+            padding: 25px;
+            margin: 15px 0;
+        }
+        .score-final {
+            font-size: 2.8rem;
+            font-weight: bold;
+            background: gold;
+            display: inline-block;
+            padding: 10px 35px;
+            border-radius: 80px;
+            margin: 15px 0;
+        }
+        .medal-emoji {
+            font-size: 4rem;
+        }
+
+        footer {
+            background: #fbe5b9;
+            text-align: center;
+            padding: 14px;
+            font-size: 0.9rem;
+            color: #5a4a2e;
+            border-top: 2px solid #ffd58c;
+        }
+
+        @media (max-width: 550px) {
+            .question-text { font-size: 1.3rem; }
+            .answer-btn { font-size: 1rem; padding: 12px 12px; }
+            .feedback { font-size: 1rem; }
+            h1 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container" id="gameContainer">
+    <div class="game-header">
+        <h1>
+            <span>☂️</span> Cum mă descurc când plouă în viața mea? <span>🌈</span>
+        </h1>
+        <div class="sub">🌱 Alege umbrela potrivită! 🌱</div>
+    </div>
+
+    <div id="dynamicContent">
+        <!-- aici va fi injectat continutul jocului (intrebari sau final) -->
+    </div>
+    <footer>
+        🌟 Fiecare alegere bună îți întărește umbrela! 🌟
+    </footer>
+</div>
+
+<script>
+    // ---------- BANCA DE INTREBARI (8-10 întrebări) ----------
+    const questions = [
+        {
+            text: "🌧️ Ai primit o notă mai mică decât credeai. Ce faci?",
+            options: [
+                "Mă enervez și arunc caietul ✖️",
+                "Îi cer ajutor învățătoarei/ părintelui să înțeleg ce am greșit ☂️",
+                "Nu mai fac teme niciodată 😤"
+            ],
+            correct: 1,   // index 1 este varianta buna
+            feedback: "Bravo! Ai ales o soluție bună! A cere ajutor e o umbrelă puternică ☂️✨"
+        },
+        {
+            text: "😞 Cine poate fi „umbrela” ta când te simți trist?",
+            options: [
+                "Prietenul meu adevărat sau familia 👨‍👩‍👧‍👦",
+                "Doar jucăriile (ignore total) 🧸",
+                "Stau singur și nu vorbesc cu nimeni 🤐"
+            ],
+            correct: 0,
+            feedback: "Corect! Să ceri sprijinul celor dragi te protejează precum o umbrelă! ❤️"
+        },
+        {
+            text: "😊 Cum te simți când cineva te ajută cu o problemă?",
+            options: [
+                "Mai ușurat și mai curajos 💪🌈",
+                "Rușinat și supărat 😣",
+                "Nu contează, nu îmi pasă 😐"
+            ],
+            correct: 0,
+            feedback: "Exact! Ajutorul primit ne face să ne simțim mai bine. E minunat să primești sprijin! ☂️😊"
+        },
+        {
+            text: "🧸 Ai greșit la un joc cu colegii, toată lumea a văzut. Ce reacție te ajută?",
+            options: [
+                "Plâng tare și fug 🌧️",
+                "Zic: „Hopa, data viitoare încerc din nou! Toți greșim câteodată.” 💪",
+                "Dau vina pe altcineva 😤"
+            ],
+            correct: 1,
+            feedback: "Super! Ai o atitudine pozitivă. A încerca din nou e o super-umbrelă! 🎉"
+        },
+        {
+            text: "☔ Ce înseamnă pentru tine „a avea o umbrelă emoțională”?",
+            options: [
+                "Să port o umbrelă adevărată la ploaie ☔",
+                "Să am curaj, încredere și oameni care mă susțin 🌈",
+                "Să evit orice problemă 🚫"
+            ],
+            correct: 1,
+            feedback: "Minunat! Umbrela emoțională înseamnă resursele tale interioare și oamenii dragi. 🌟"
+        },
+        {
+            text: "💬 Când ești trist și nu știi ce să faci, care este o alegere pozitivă?",
+            options: [
+                "Vorbesc despre cum mă simt cu un adult de încredere 🗣️",
+                "Stau în cameră și mă uit la perete 😶",
+                "Arunc cu lucruri 😠"
+            ],
+            correct: 0,
+            feedback: "Excelent! Să vorbești despre emoții te ajută să nu te simți copleșit. E o umbrelă puternică! ☂️💛"
+        },
+        {
+            text: "🤝 Un coleg te-a îmbrâncit din greșeală. Ce alegere arată maturitate?",
+            options: [
+                "Îl împing și eu mai tare 😡",
+                "Îi spun calm: „M-ai împins, te rog să ai mai multă grijă.” 🕊️",
+                "Mă plâng toată ziua la doamna învățătoare (fără să încerc să rezolv)" 
+            ],
+            correct: 1,
+            feedback: "Bravo! Să comunici calm e o alegere inteligentă și prietenoasă. 👏🌈"
+        },
+        {
+            text: "✨ Ce te poate ajuta să ai încredere în tine când apare o problemă?",
+            options: [
+                "Să-mi amintesc că am mai rezolvat greutăți în trecut 💪",
+                "Să mă ascund sub pătură 🛌",
+                "Să cred că nu voi reuși niciodată 😞"
+            ],
+            correct: 0,
+            feedback: "Da! Ai încredere în tine, ești mai puternic decât crezi. Asta e o umbrelă interioară ☀️"
+        },
+        {
+            text: "🧩 Ai o problemă grea la matematică. Ce faci?",
+            options: [
+                "Renunț imediat, e prea greu 😫",
+                "Cer ajutorul unui coleg sau încerc o altă metodă 📚✨",
+                "Copiez răspunsul fără să înțeleg 🤫"
+            ],
+            correct: 1,
+            feedback: "Perfect! A cere ajutor și a persevera e o calitate minunată! ☂️🧠"
+        },
+        {
+            text: "🌈 Dacă mâine e o zi grea, cum îmi pot pregăti „umbrela” interioară?",
+            options: [
+                "Mă gândesc la oamenii care mă susțin și îmi spun un cuvânt încurajator 🌞",
+                "Mă tem și nu ies din casă 😨",
+                "Nu mă pregătesc deloc 😑"
+            ],
+            correct: 0,
+            feedback: "Bravo! Apreciezi resursele tale și îți întărești echilibrul emoțional. Ești tare! 💪🌈"
+        }
+    ]; // exact 10 întrebări
+
+    // variabile de stare
+    let currentQuestionIndex = 0;
+    let userScore = 0;
+    let answerLock = false;        // blocam click-urile multiple la aceeasi intrebare
+    let currentSelectedAnswer = -1;
+    let gameFinished = false;
+
+    // elemente DOM container
+    const dynamicContainer = document.getElementById("dynamicContent");
+
+    // helper: afișează ecranul întrebării curente
+    function renderQuestion() {
+        if (gameFinished) return;
+        if (currentQuestionIndex >= questions.length) {
+            finishGame();
+            return;
+        }
+
+        const qData = questions[currentQuestionIndex];
+        const total = questions.length;
+        const currentNum = currentQuestionIndex + 1;
+
+        // structura HTML pentru întrebare
+        let html = `
+            <div class="score-area">
+                <div class="score-box">⭐ Scor: ${userScore}/${total}</div>
+                <div class="question-counter">☂️ Întrebarea ${currentNum} din ${total}</div>
+            </div>
+            <div class="question-area">
+                <div class="question-text">${qData.text}</div>
+                <div class="answers" id="answersList">
+        `;
+        // generam butoanele de răspuns
+        qData.options.forEach((opt, idx) => {
+            let emojiPrefix = "";
+            if (idx === 0) emojiPrefix = "🌱";
+            else if (idx === 1) emojiPrefix = "☂️";
+            else emojiPrefix = "🌧️";
+            html += `
+                <button class="answer-btn" data-opt-index="${idx}">
+                    <span class="answer-emoji">${emojiPrefix}</span>
+                    <span>${opt}</span>
+                </button>
+            `;
+        });
+
+        html += `
+                </div>
+            </div>
+            <div class="feedback" id="feedbackMsg">
+                🌟 Alege un răspuns pentru a-ți deschide umbrela!
+            </div>
+            <div class="action-buttons">
+                <button class="btn-restart" id="restartBtnGame">🔄 Reîncepe jocul</button>
+                <button class="btn-next" id="nextBtnGame" disabled>➡️ Întrebarea următoare</button>
+            </div>
+        `;
+
+        dynamicContainer.innerHTML = html;
+
+        // atasam event-uri la butoanele de raspuns
+        const answerBtns = document.querySelectorAll('.answer-btn');
+        const nextBtn = document.getElementById('nextBtnGame');
+        const restartBtn = document.getElementById('restartBtnGame');
+
+        // functie pentru a selecta un raspuns
+        function handleAnswer(clickedIndex) {
+            if (answerLock) return; // deja a răspuns la întrebarea asta
+            const isCorrect = (clickedIndex === qData.correct);
+            if (isCorrect) {
+                userScore++;
+            }
+            // actualizam scorul in header (modificam in DOM)
+            const scoreBox = document.querySelector('.score-box');
+            if (scoreBox) scoreBox.innerHTML = `⭐ Scor: ${userScore}/${total}`;
+
+            // actualizam feedback
+            const feedbackDiv = document.getElementById('feedbackMsg');
+            if (isCorrect) {
+                feedbackDiv.innerHTML = `🎉 ${qData.feedback} 🎉`;
+                feedbackDiv.style.background = "#c8f0d9";
+            } else {
+                // feedback alternativ când e greșit, dar pozitiv și încurajator
+                const correctAnswerText = qData.options[qData.correct];
+                feedbackDiv.innerHTML = `😊 Încearcă data viitoare! Răspunsul corect: „${correctAnswerText}”. Dar ești învățare, continuă! ☂️✨`;
+                feedbackDiv.style.background = "#ffefc0";
+            }
+
+            // evidențiem vizual răspunsul corect vs greșit (optional, dar educativ)
+            answerBtns.forEach((btn, i) => {
+                btn.disabled = true;
+                btn.style.opacity = "0.7";
+                if (i === qData.correct) {
+                    btn.style.background = "#b7e3b2";
+                    btn.style.border = "3px solid #3a9b3a";
+                }
+                if (i === clickedIndex && i !== qData.correct) {
+                    btn.style.background = "#ffc2b3";
+                }
+            });
+
+            answerLock = true;
+            currentSelectedAnswer = clickedIndex;
+            // activeaza butonul next
+            if (nextBtn) nextBtn.disabled = false;
+        }
+
+        answerBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (answerLock) return;
+                const idx = parseInt(btn.getAttribute('data-opt-index'));
+                handleAnswer(idx);
+            });
+        });
+
+        // buton next: trece la urmatoarea intrebare
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (!answerLock) {
+                    // inca nu s-a răspuns, nu permite next
+                    const fb = document.getElementById('feedbackMsg');
+                    fb.innerHTML = "🌸 Alege mai întâi un răspuns, te rog! 🌸";
+                    fb.style.background = "#ffdfb3";
+                    return;
+                }
+                // trecem la urmatoarea intrebare
+                currentQuestionIndex++;
+                answerLock = false;
+                currentSelectedAnswer = -1;
+                renderQuestion(); // re-randeaza urmatoarea intrebare
+            });
+        }
+
+        // buton restart dinamic
+        if (restartBtn) {
+            restartBtn.addEventListener('click', () => {
+                resetGame();
+            });
+        }
+    }
+
+    // FUNCTION FINISH GAME - ecran final cu scor si mesaj motivațional
+    function finishGame() {
+        gameFinished = true;
+        const total = questions.length;
+        const finalScore = userScore;
+        let motivationalMessage = "";
+        let medalEmoji = "";
+
+        if (finalScore === total) {
+            motivationalMessage = "🌈 Uau! Ai o umbrelă uriașă și puternică! 🌈 Ești pregătit pentru orice ploaie. 🤗";
+            medalEmoji = "🏆🌟☂️";
+        } else if (finalScore >= total - 2) {  // 8+ din 10
+            motivationalMessage = "☔ Foarte bine! Ai o umbrelă rezistentă. Continuă să ai încredere și să ceri ajutor! 💪🌈";
+            medalEmoji = "🌂✨🏅";
+        } else if (finalScore >= total / 2) {
+            motivationalMessage = "🌱 Ești pe drumul cel bun! Mai construiești umbrela ta pas cu pas. Fiecare alegere bună contează! ☂️🌻";
+            medalEmoji = "☔🌱📖";
+        } else {
+            motivationalMessage = "🧸 Nicio problemă! Învățăm mereu. Acum știi mai multe despre cum să te protejezi. Data viitoare vei avea o umbrelă mai tare! ❤️🌈";
+            medalEmoji = "🌧️☂️💪";
+        }
+
+        const finalHtml = `
+            <div class="final-screen">
+                <div class="medal-emoji">${medalEmoji}</div>
+                <div class="score-final">Scorul tău: ${finalScore} / ${total}</div>
+                <div class="final-message">
+                    ${motivationalMessage}
+                </div>
+                <button class="btn-restart" id="finalRestartBtn" style="font-size:1.4rem; padding:14px 35px;">🔄 Joacă din nou</button>
+                <div style="margin-top: 24px; font-size:1.2rem">☀️ Amintește-ți: Când plouă în suflet, caută-ți umbrela (familie, prieteni, curaj)!</div>
+            </div>
+        `;
+
+        dynamicContainer.innerHTML = finalHtml;
+        const restartFinal = document.getElementById('finalRestartBtn');
+        if (restartFinal) {
+            restartFinal.addEventListener('click', () => {
+                resetGame();
+            });
+        }
+    }
+
+    // RESET complet joc
+    function resetGame() {
+        currentQuestionIndex = 0;
+        userScore = 0;
+        answerLock = false;
+        currentSelectedAnswer = -1;
+        gameFinished = false;
+        renderQuestion();  // o ia de la capat
+    }
+
+    // INITIALIZARE JOC
+    function initGame() {
+        resetGame(); // setare initiala
+    }
+
+    // start
+    initGame();
+</script>
+</body>
+</html>
